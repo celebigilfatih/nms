@@ -1,0 +1,35 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache curl openssh-client sshpass expect
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install --production
+
+# Copy application files
+COPY . .
+
+# Make shell scripts executable
+RUN chmod +x /app/*.sh /app/*.exp 2>/dev/null || true
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:3001/api/health || exit 1
+
+# Expose port
+EXPOSE 3001
+
+# Start application
+CMD ["node", "index.js"]

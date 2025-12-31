@@ -1,0 +1,17 @@
+{
+  "device_name": "ISL_PREFABRIK_SW",
+  "ip": "10.5.0.76",
+  "community": "Fn4c2023",
+  "status": "offline",
+  "info": {},
+  "metrics": {
+    "cpu_usage": 45.3,
+    "memory_usage": 62.8,
+    "disk_usage": 78.5,
+    "network_in": 52428800,
+    "network_out": 31457280,
+    "uptime": 99.8,
+    "last_polled": "2025-12-26T16:05:00Z"
+  },
+  "error": "Connection timeout"
+}

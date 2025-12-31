@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+# Script to retrieve HP switch configuration via SSH with interactive mode
+
+set ip [lindex $argv 0]
+set user [lindex $argv 1]
+set password [lindex $argv 2]
+set command [lindex $argv 3]
+
+set timeout 15
+
+spawn sshpass -p "$password" ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o KexAlgorithms=+diffie-hellman-group1-sha1 -o HostKeyAlgorithms=ssh-rsa $user@$ip
+
+expect {
+    ">" {
+        send "terminal length 0\r"
+        expect ">"
+        send "$command\r"
+        expect ">"
+        send "exit\r"
+        expect eof
+    }
+    "Password:" {
+        send "$password\r"
+        expect ">"
+        send "terminal length 0\r"
+        expect ">"
+        send "$command\r"
+        expect ">"
+        send "exit\r"
+        expect eof
+    }
+    timeout {
+        puts "Timeout waiting for device prompt"
+        exit 1
+    }
+}
