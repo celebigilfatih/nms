@@ -35,17 +35,32 @@ class Device(Base):
     name = Column(String(255), nullable=False, unique=True)
     ip_address = Column(String(45), nullable=False)  # IPv4 or IPv6
     vendor = Column(String(50), nullable=False)  # "cisco", "fortinet", "mikrotik", "generic"
-    community_string = Column(String(255), nullable=True)  # Encrypted in production
+    device_type = Column(String(100), nullable=True)
+    snmp_community = Column(String(255), nullable=True)  # Encrypted in production
     snmp_version = Column(String(10), default="2c")
     snmp_port = Column(Integer, default=161)
-    enabled = Column(Boolean, default=True)
+    snmp_username = Column(String(255), nullable=True)
+    snmp_auth_protocol = Column(String(20), nullable=True)
+    snmp_auth_password = Column(String(255), nullable=True)
+    snmp_priv_protocol = Column(String(20), nullable=True)
+    snmp_priv_password = Column(String(255), nullable=True)
+    polling_enabled = Column(Boolean, default=True)
+    polling_interval = Column(Integer, default=300)
+    connection_status = Column(String(20), default="offline")
+    last_polled = Column(DateTime, nullable=True)
+    last_online = Column(DateTime, nullable=True)
+    location = Column(String(255), nullable=True)
+    notes = Column(Text, nullable=True)
+    created_by = Column(String(255), nullable=True)
+    ssh_username = Column(String(255), nullable=True)
+    ssh_password = Column(String(255), nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     __table_args__ = (
         Index("idx_device_ip", "ip_address"),
-        Index("idx_device_enabled", "enabled"),
+        Index("idx_device_polling", "polling_enabled"),
     )
 
 

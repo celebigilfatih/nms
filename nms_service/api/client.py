@@ -144,6 +144,41 @@ class APIClient:
             logger.error(f"API call failed for acknowledge_alarm: {e}")
             return False
     
+    def update_device_status(
+        self,
+        device_id: int,
+        status: str,  # "online", "offline"
+    ) -> bool:
+        """Update device connection status via API
+        
+        Args:
+            device_id: Device ID
+            status: Connection status (online/offline)
+            
+        Returns:
+            Success status
+        """
+        try:
+            payload = {"connection_status": status}
+            
+            response = self.client.patch(
+                self._build_url(f"/devices/{device_id}"),
+                json=payload,
+            )
+            
+            if response.status_code in (200, 204):
+                logger.debug(f"Updated device {device_id} status to {status}")
+                return True
+            else:
+                logger.warning(
+                    f"API device status update failed: {response.status_code}"
+                )
+                return False
+                
+        except Exception as e:
+            logger.error(f"API call failed for update_device_status: {e}")
+            return False
+    
     def send_metrics(
         self,
         device_id: int,

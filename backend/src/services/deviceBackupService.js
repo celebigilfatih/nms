@@ -87,6 +87,12 @@ class DeviceBackupService {
       
       console.log(`[BACKUP DEBUG] Command executed. stdout length: ${stdout?.length}, stderr: ${stderr?.length}`);
       let cleanedOutput = stdout || '';
+      console.log(`[BACKUP DEBUG] Before cleanup - has --More--: ${cleanedOutput.includes('--More--')}`);
+      
+      // Normalize line endings: convert \r\n and \r to \n
+      cleanedOutput = cleanedOutput.replace(/\r\n/g, '\n');
+      cleanedOutput = cleanedOutput.replace(/\r/g, '\n');
+      console.log(`[BACKUP DEBUG] After CR/LF normalization - has --More--: ${cleanedOutput.includes('--More--')}`);
       
       // Remove ANSI escape sequences (terminal control characters)
       cleanedOutput = cleanedOutput.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
@@ -94,14 +100,69 @@ class DeviceBackupService {
       cleanedOutput = cleanedOutput.replace(/\[\?[0-9]*[a-z]/g, '');
       cleanedOutput = cleanedOutput.replace(/\[[0-9]+[A-Za-z]/g, '');
       
-      // Remove "-- MORE --" paging prompts
-      cleanedOutput = cleanedOutput.replace(/-- MORE --.*/g, '');
+      // CRITICAL: Aggressive pagination marker removal
+      // Step 1: Remove pagination prompts completely (most important)
+      cleanedOutput = cleanedOutput.replace(/\s+--[Mm]ore--\s*/g, ' ');
+      cleanedOutput = cleanedOutput.replace(/\s*--[Mm]ore--\s*/g, ' ');
+      cleanedOutput = cleanedOutput.replace(/\[\s*[Mm]ore\s*\]/g, '');
+      cleanedOutput = cleanedOutput.replace(/\s*Press\s+.*?continue\s*/gi, ' ');
       
-      // Remove redundant triple newlines
-      cleanedOutput = cleanedOutput.split('\n\n\n').join('\n\n');
+      // Step 2: Line-based removal for lines with ONLY pagination markers
+      const lines = cleanedOutput.split('\n');
+      const cleanedLines = lines.filter(line => {
+        const trimmed = line.trim();
+        // Skip lines that are just spaces, dashes, and the word More
+        if (!trimmed) return true; // Keep empty lines
+        if (trimmed.match(/^-*\s*[Mm]ore\s*-*$/) !== null) return false; // Remove --More--
+        if (trimmed === '[More]') return false; // Remove [More]
+        return true;
+      });
+      cleanedOutput = cleanedLines.join('\n');
       
-      // Keep only lines after "Running configuration" to remove banner
-      const configIndex = cleanedOutput.toLowerCase().indexOf('running configuration');
+      // Step 3: Final pass - remove any remaining pagination artifacts
+      cleanedOutput = cleanedOutput.replace(/\s*--[Mm]ore--\s*/g, '');
+      cleanedOutput = cleanedOutput.replace(/\s+\[More\]\s+/g, ' ');
+      
+      // Step 4: Cleanup excessive whitespace created by removals
+      cleanedOutput = cleanedOutput.replace(/\n{3,}/g, '\n\n');
+      cleanedOutput = cleanedOutput.replace(/\s{2,}\n/g, '\n');
+      cleanedOutput = cleanedOutput.replace(/\n\s{2,}/g, '\n');
+      
+      // Remove other pagination prompt formats
+      cleanedOutput = cleanedOutput.replace(/\s*-{1,2}\s*More\s*-{1,2}\s*/gi, '');
+      cleanedOutput = cleanedOutput.replace(/\[\s*[Mm]ore\s*\]/g, '');
+      cleanedOutput = cleanedOutput.replace(/\(q\)\s*to\s*quit/gi, '');
+      cleanedOutput = cleanedOutput.replace(/Press\s+.*?continue/gi, '');
+      
+      // Remove backspace and control characters
+      cleanedOutput = cleanedOutput.replace(/\u0008/g, '');
+      cleanedOutput = cleanedOutput.replace(/\u0007/g, '');
+      
+      // Clean up extra blank lines
+      cleanedOutput = cleanedOutput.replace(/\n{3,}/g, '\n\n');
+      
+      // Trim output
+      cleanedOutput = cleanedOutput.trim();
+      
+      // Remove lines that are just prompt echos (command echoes from terminal)
+      // Remove lines with only prompt characters and command echoes
+      const finalLines = cleanedOutput.split('\n').filter(line => {
+        const trimmed = line.trim();
+        // Remove lines that are: prompt echoes, error markers, etc.
+        if (trimmed.match(/^10\.KAT_SW#/)) return false; // Prompt echo
+        if (trimmed.match(/^[>%]\s*Invalid/)) return false; // Error lines
+        if (trimmed.match(/^\^\s*$/)) return false; // Error marker
+        if (trimmed.match(/^%\s*/)) return false; // Error prompt
+        return true;
+      });
+      cleanedOutput = finalLines.join('\n').trim();
+      
+      // Look for configuration start markers
+      let configIndex = cleanedOutput.toLowerCase().indexOf('running configuration');
+      if (configIndex === -1) {
+        // Alternative: look for 'current configuration'
+        configIndex = cleanedOutput.toLowerCase().indexOf('current configuration');
+      }
       if (configIndex !== -1) {
         cleanedOutput = cleanedOutput.substring(configIndex);
       }

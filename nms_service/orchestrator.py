@@ -61,11 +61,11 @@ class NMSOrchestrator:
                     device_id=device.id,
                     device_name=device.name,
                     ip_address=device.ip_address,
-                    community_string=device.community_string,
+                    community_string=device.snmp_community,
                     vendor=device.vendor,
                     snmp_port=device.snmp_port,
                     snmp_version=device.snmp_version,
-                    enabled=device.enabled,
+                    enabled=device.polling_enabled,
                 )
                 self.poller.register_device(config)
                 count += 1
@@ -102,6 +102,12 @@ class NMSOrchestrator:
                     # Poll interfaces
                     try:
                         interfaces = self.poller.poll_interfaces(device_id)
+                        
+                        if interfaces:
+                            # Device is online - mark it as such
+                            self.api_client.update_device_status(device_id, "online")
+                            device_repo = DeviceRepository(session)
+                            device_repo.update_status(device_id, "online")
                         
                         for iface_metric in interfaces:
                             # Generate alarms for interface
@@ -146,6 +152,13 @@ class NMSOrchestrator:
                         
                     except Exception as e:
                         logger.error(f"Interface polling failed for {device_name}: {e}")
+                        # Mark device as offline if interface poll fails
+                        try:
+                            self.api_client.update_device_status(device_id, "offline")
+                            device_repo = DeviceRepository(session)
+                            device_repo.update_status(device_id, "offline")
+                        except:
+                            pass
                     
                     # Poll device health
                     try:
@@ -159,6 +172,10 @@ class NMSOrchestrator:
                             )
                             
                             if health_metric:
+                                # Device is online - update status
+                                self.api_client.update_device_status(device_id, "online")
+                                device_repo.update_status(device_id, "online")
+                                
                                 # Generate alarms
                                 alarms = self.alarm_engine.evaluate_device_health(
                                     health_metric
@@ -190,9 +207,19 @@ class NMSOrchestrator:
                                         "uptime_seconds": health_metric.uptime_seconds,
                                     },
                                 )
+                            else:
+                                # Health poll failed - mark device as offline
+                                self.api_client.update_device_status(device_id, "offline")
+                                device_repo.update_status(device_id, "offline")
                     
                     except Exception as e:
                         logger.error(f"Health polling failed for {device_name}: {e}")
+                        # Mark device as offline if health check failed
+                        try:
+                            self.api_client.update_device_status(device_id, "offline")
+                            device_repo.update_status(device_id, "offline")
+                        except:
+                            pass
                 
                 except Exception as e:
                     logger.error(f"Error polling device {device_id}: {e}")

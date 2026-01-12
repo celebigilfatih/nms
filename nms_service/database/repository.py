@@ -227,7 +227,7 @@ class DeviceRepository:
                 name=name,
                 ip_address=ip_address,
                 vendor=vendor,
-                community_string=community_string,
+                snmp_community=community_string,
                 snmp_version=snmp_version,
                 snmp_port=snmp_port,
             )
@@ -246,7 +246,7 @@ class DeviceRepository:
         Returns:
             List of DeviceDB records
         """
-        return self.session.query(DeviceDB).filter(DeviceDB.enabled == True).all()
+        return self.session.query(DeviceDB).filter(DeviceDB.polling_enabled == True).all()
     
     def get_by_id(self, device_id: int) -> Optional[DeviceDB]:
         """Get device by ID
@@ -269,6 +269,30 @@ class DeviceRepository:
             DeviceDB or None
         """
         return self.session.query(DeviceDB).filter(DeviceDB.name == name).first()
+    
+    def update_status(self, device_id: int, status: str) -> bool:
+        """Update device connection status
+        
+        Args:
+            device_id: Device ID
+            status: Connection status ("online" or "offline")
+            
+        Returns:
+            Success status
+        """
+        try:
+            device = self.get_by_id(device_id)
+            if device:
+                device.connection_status = status
+                device.last_polled = datetime.utcnow()
+                self.session.commit()
+                logger.debug(f"Updated device {device_id} status to {status}")
+                return True
+            return False
+        except Exception as e:
+            self.session.rollback()
+            logger.error(f"Failed to update device status: {e}")
+            return False
 
 
 class MetricsRepository:

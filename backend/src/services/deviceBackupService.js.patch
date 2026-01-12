@@ -1,0 +1,33 @@
+--- PAGINATION CLEANUP ENHANCEMENTS ---
+
+Replace section starting at line 97:
+
+      // Remove ANSI escape sequences (terminal control characters)
+      cleanedOutput = cleanedOutput.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
+      cleanedOutput = cleanedOutput.replace(/\[\d+;\d+[a-z]/g, '');
+      cleanedOutput = cleanedOutput.replace(/\[\?[0-9]*[a-z]/g, '');
+      cleanedOutput = cleanedOutput.replace(/\[[0-9]+[A-Za-z]/g, '');
+      
+      // Remove all paging and terminal control sequences
+      // Remove "-- MORE --" paging prompts (with or without surrounding text)
+      cleanedOutput = cleanedOutput.replace(/[-\s]*-- MORE --[-\s]*/g, '');
+      cleanedOutput = cleanedOutput.replace(/\[.*?more.*?\]/gi, '');
+      
+      // Remove terminal pagination indicators
+      cleanedOutput = cleanedOutput.replace(/Press any key to continue/gi, '');
+      cleanedOutput = cleanedOutput.replace(/\(q\) to quit/gi, '');
+      cleanedOutput = cleanedOutput.replace(/^\s*\[.*?continue.*?\]\s*$/gmi, '');
+      
+      // Remove backspace sequences and control characters that may appear with paging
+      cleanedOutput = cleanedOutput.replace(/\u0008/g, ''); // Backspace
+      cleanedOutput = cleanedOutput.replace(/\u0007/g, ''); // Bell
+      
+      // Remove any remaining terminal escape sequences
+      cleanedOutput = cleanedOutput.replace(/\u001b\[[0-9;]*m/g, ''); // Color codes
+      cleanedOutput = cleanedOutput.replace(/\u001b\[[A-Z]/g, ''); // Cursor controls
+      
+      // Remove redundant triple newlines
+      cleanedOutput = cleanedOutput.split('\n\n\n').join('\n\n');
+      
+      // Trim excess whitespace at beginning and end
+      cleanedOutput = cleanedOutput.trim();
