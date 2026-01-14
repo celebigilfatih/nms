@@ -84,7 +84,7 @@ class Config:
         
         # SNMP
         self.snmp = SNMPConfig(
-            snmp_timeout=int(os.getenv("SNMP_TIMEOUT", 5)),
+            snmp_timeout=int(os.getenv("SNMP_TIMEOUT", 10)),
             snmp_retries=int(os.getenv("SNMP_RETRIES", 3)),
             max_concurrent_pollers=int(os.getenv("MAX_CONCURRENT_POLLERS", 20)),
         )

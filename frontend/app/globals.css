@@ -163,7 +163,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Card utilities */
 .card {
-  @apply bg-slate-950/80 backdrop-blur-xl border border-slate-800/50 rounded-xl hover:border-orange-500/50 transition;
+  @apply bg-slate-950/80 backdrop-blur-xl border border-slate-800/50 rounded-xl hover:border-orange-500/50 transition duration-300;
 }
 
 /* Text utilities */

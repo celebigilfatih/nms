@@ -57,6 +57,9 @@ class InterfaceMetric:
     speed: int         # bps
     in_octets: int
     out_octets: int
+    in_errors: int = 0
+    out_errors: int = 0
+    mtu: int = 1500
     timestamp: datetime = field(default_factory=datetime.utcnow)
     
     def is_port_down(self) -> bool:

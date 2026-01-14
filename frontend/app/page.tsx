@@ -170,7 +170,7 @@ export default function DashboardPage() {
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {metrics.map((metric, index) => (
-            <div key={index} className="card p-6 hover:border-purple-500/50 transition">
+            <div key={index} className="card p-6 hover:border-orange-500/50 transition">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-slate-400 text-sm font-medium">{metric.title}</h3>
                 <i className={`fas ${metric.icon} ${metric.color} text-xl`} />

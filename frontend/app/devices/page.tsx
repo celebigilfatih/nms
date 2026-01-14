@@ -17,6 +17,8 @@ interface Device {
   polling_enabled?: boolean;
   last_polled?: string;
   last_online?: string;
+  vendor_model?: string;
+  serial_number?: string;
 }
 
 export default function DevicesPage() {
@@ -85,142 +87,237 @@ export default function DevicesPage() {
     <Layout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white">Devices</h1>
-            <p className="text-slate-400 mt-1">Manage network devices</p>
+            <h1 className="text-4xl font-extrabold text-white tracking-tight">
+              Network <span className="text-orange-500">Devices</span>
+            </h1>
+            <p className="text-slate-400 mt-1 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              Monitoring {devices.length} nodes across the network
+            </p>
           </div>
-          <Link
-            href="/devices/add"
-            className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition font-medium"
-          >
-            <i className="fas fa-plus" />
-            Add Device
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={loadDevices}
+              disabled={loading}
+              className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition"
+              title="Refresh Devices"
+            >
+              <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`} />
+            </button>
+            <Link
+              href="/devices/add"
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-lg transition font-bold shadow-lg shadow-orange-500/20"
+            >
+              <i className="fas fa-plus" />
+              Add Device
+            </Link>
+          </div>
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="card p-6">
-            <div className="flex items-center justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="card p-1 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="p-6 flex items-center justify-between relative">
               <div>
-                <p className="text-slate-400 text-sm">Total Devices</p>
-                <p className="text-3xl font-bold text-white mt-1">{devices.length}</p>
+                <p className="text-slate-400 text-sm font-medium uppercase tracking-wider">Total Inventory</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <p className="text-4xl font-black text-white">{devices.length}</p>
+                  <p className="text-blue-400 text-sm font-bold">Devices</p>
+                </div>
               </div>
-              <i className="fas fa-server text-3xl text-blue-400" />
+              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
+                <i className="fas fa-server text-2xl text-blue-400" />
+              </div>
             </div>
           </div>
-          <div className="card p-6">
-            <div className="flex items-center justify-between">
+
+          <div className="card p-1 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="p-6 flex items-center justify-between relative">
               <div>
-                <p className="text-slate-400 text-sm">Online</p>
-                <p className="text-3xl font-bold text-green-400 mt-1">{onlineCount}</p>
+                <p className="text-slate-400 text-sm font-medium uppercase tracking-wider">Operational</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <p className="text-4xl font-black text-green-400">{onlineCount}</p>
+                  <p className="text-green-500/60 text-sm font-bold">Online</p>
+                </div>
               </div>
-              <i className="fas fa-check-circle text-3xl text-green-400" />
+              <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center border border-green-500/20 group-hover:scale-110 transition-transform">
+                <i className="fas fa-check-circle text-2xl text-green-400" />
+              </div>
             </div>
           </div>
-          <div className="card p-6">
-            <div className="flex items-center justify-between">
+
+          <div className="card p-1 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="p-6 flex items-center justify-between relative">
               <div>
-                <p className="text-slate-400 text-sm">Offline</p>
-                <p className="text-3xl font-bold text-red-400 mt-1">{offlineCount}</p>
+                <p className="text-slate-400 text-sm font-medium uppercase tracking-wider">Disconnected</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <p className="text-4xl font-black text-red-400">{offlineCount}</p>
+                  <p className="text-red-500/60 text-sm font-bold">Offline</p>
+                </div>
               </div>
-              <i className="fas fa-times-circle text-3xl text-red-400" />
+              <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 group-hover:scale-110 transition-transform">
+                <i className="fas fa-times-circle text-2xl text-red-400" />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="Search by device name or IP address..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
-          />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
-          >
-            <option value="all">All Status</option>
-            <option value="online">Online</option>
-            <option value="offline">Offline</option>
-          </select>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search by name, IP, model or serial..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-900/50 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-all"
+            />
+          </div>
+          <div className="flex gap-4">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-6 py-3 rounded-xl bg-slate-900/50 border border-slate-800 text-white focus:outline-none focus:border-orange-500/50 transition-all cursor-pointer appearance-none"
+            >
+              <option value="all">All Status</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
         </div>
 
-        {/* Devices Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDevices.map(device => (
-            <Link
-              key={device.id}
-              href={`/devices/${device.id}`}
-              className="card p-6 hover:border-purple-500/50 transition cursor-pointer group"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition">
-                    {device.name}
-                  </h3>
-                  <p className="text-slate-400 text-sm mt-1">{device.ip_address}</p>
-                </div>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ml-2 ${
-                    device.connection_status === 'online'
-                      ? 'status-online'
-                      : 'status-offline'
-                  }`}
-                >
-                  {device.connection_status ? device.connection_status.charAt(0).toUpperCase() + device.connection_status.slice(1) : 'Unknown'}
-                </span>
-              </div>
-
-              <div className="space-y-2 text-sm text-slate-400 mb-4">
-                <div className="flex justify-between">
-                  <span>Vendor:</span>
-                  <span className="text-white">{device.vendor || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Type:</span>
-                  <span className="text-white">{device.device_type || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Port:</span>
-                  <span className="text-white">{device.snmp_port || 161}</span>
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-4 border-t border-slate-700">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.location.href = `/devices/${device.id}/edit`;
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm rounded-lg transition"
-                >
-                  <i className="fas fa-edit" />
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleDelete(device.id);
-                  }}
-                  className="flex-1 btn-danger py-2 text-sm rounded-lg"
-                >
-                  <i className="fas fa-trash mr-1" />
-                  Delete
-                </button>
-              </div>
-            </Link>
-          ))}
+        {/* Devices Table View */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <i className="fas fa-list text-orange-500" />
+            Device Inventory Table
+          </h2>
+          <div className="text-[10px] text-slate-500 font-mono">
+            v2.0-table-view
+          </div>
+        </div>
+        <div className="card overflow-hidden border-orange-500/20 shadow-2xl shadow-orange-500/5">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-900/80 border-b border-orange-500/30">
+                  <th className="px-6 py-5 text-[11px] uppercase font-black text-orange-500 tracking-widest">Device Name</th>
+                  <th className="px-6 py-5 text-[11px] uppercase font-black text-slate-400 tracking-widest">IP Address</th>
+                  <th className="px-6 py-5 text-[11px] uppercase font-black text-slate-400 tracking-widest text-center">Status</th>
+                  <th className="px-6 py-5 text-[11px] uppercase font-black text-slate-400 tracking-widest">Vendor / Type</th>
+                  <th className="px-6 py-5 text-[11px] uppercase font-black text-slate-400 tracking-widest">Last Polled</th>
+                  <th className="px-6 py-5 text-[11px] uppercase font-black text-slate-400 tracking-widest text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {filteredDevices.map(device => {
+                  console.log('Rendering table row for:', device.name);
+                  return (
+                    <tr key={device.id} className="hover:bg-orange-500/[0.03] transition-all duration-300 group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${
+                            device.connection_status === 'online' 
+                            ? 'bg-green-500/5 border-green-500/20 text-green-400 group-hover:border-green-500/50 shadow-lg shadow-green-500/10' 
+                            : 'bg-red-500/5 border-red-500/20 text-red-400 group-hover:border-red-500/50'
+                          }`}>
+                            <i className={`fas ${device.device_type === 'Switch' ? 'fa-network-wired' : 'fa-server'} text-sm`} />
+                          </div>
+                          <div>
+                            <Link href={`/devices/${device.id}`} className="text-sm font-bold text-white hover:text-orange-400 transition-colors">
+                              {device.name}
+                            </Link>
+                            <div className="text-[10px] text-slate-500 font-medium">ID: #{device.id}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-xs text-orange-200/70 font-mono bg-orange-500/10 px-2 py-1 rounded border border-orange-500/20">{device.ip_address}</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span
+                          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border-2 ${
+                            device.connection_status === 'online'
+                              ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                              : 'bg-red-500/10 text-red-400 border-red-500/20'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${device.connection_status === 'online' ? 'bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`} />
+                          {device.connection_status || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-1.5 text-xs text-white font-bold">
+                            {device.vendor || 'Generic'}
+                          </div>
+                          <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest opacity-70">
+                            {device.device_type || 'N/A'}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {device.last_polled ? (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-slate-300 font-semibold">{new Date(device.last_polled).toLocaleDateString()}</span>
+                            <span className="text-[10px] text-slate-500 font-mono uppercase">{new Date(device.last_polled).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] italic text-slate-600 bg-slate-900/50 px-2 py-1 rounded">Never Polled</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                          <Link
+                            href={`/devices/${device.id}`}
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700 hover:border-slate-500 shadow-lg"
+                            title="View Details"
+                          >
+                            <i className="fas fa-eye text-xs" />
+                          </Link>
+                          <Link
+                            href={`/devices/${device.id}/edit`}
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 transition-all border border-orange-500/20 hover:border-orange-500/50 shadow-lg"
+                            title="Edit Device"
+                          >
+                            <i className="fas fa-edit text-xs" />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(device.id)}
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all border border-red-500/20 hover:border-red-500/50 shadow-lg"
+                            title="Delete Device"
+                          >
+                            <i className="fas fa-trash-alt text-xs" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {filteredDevices.length === 0 && !loading && (
-          <div className="text-center py-12 card p-8">
-            <i className="fas fa-inbox text-4xl text-slate-500 mb-4" />
-            <p className="text-slate-400 text-lg">No devices found</p>
+          <div className="text-center py-20 card flex flex-col items-center">
+            <div className="w-20 h-20 rounded-full bg-slate-900 flex items-center justify-center mb-6 border border-slate-800">
+              <i className="fas fa-search text-3xl text-slate-700" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">No devices found</h3>
+            <p className="text-slate-500 max-w-xs">We couldn't find any devices matching your current search or filters.</p>
+            <button 
+              onClick={() => {setSearch(''); setStatusFilter('all');}}
+              className="mt-6 text-orange-500 font-bold hover:text-orange-400 transition-colors"
+            >
+              Clear all filters
+            </button>
           </div>
         )}
       </div>

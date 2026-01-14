@@ -7,6 +7,7 @@ from datetime import datetime
 from sqlalchemy import (
     Column,
     Integer,
+    BigInteger,
     String,
     Float,
     Boolean,
@@ -70,18 +71,18 @@ class Alarm(Base):
     
     id = Column(Integer, primary_key=True)
     device_id = Column(Integer, ForeignKey("devices.id"), nullable=False)
-    device_name = Column(String(255))
     
-    type = Column(SQLEnum(AlarmType), nullable=False)
+    alarm_code = Column(String(50), nullable=False)
     severity = Column(SQLEnum(AlarmSeverity), nullable=False)
     message = Column(Text, nullable=False)
+    status = Column(String(50), default="active")
+    source = Column(String(100), nullable=True)
     
-    acknowledged = Column(Boolean, default=False)
     acknowledged_at = Column(DateTime, nullable=True)
-    acknowledged_by = Column(String(255), nullable=True)
+    acknowledged_by = Column(Integer, nullable=True)
     
-    resolved = Column(Boolean, default=False)
     resolved_at = Column(DateTime, nullable=True)
+    resolved_by = Column(Integer, nullable=True)
     
     alarm_metadata = Column(JSON, default={})  # Vendor-specific data
     
@@ -91,7 +92,33 @@ class Alarm(Base):
         Index("idx_alarm_device", "device_id"),
         Index("idx_alarm_severity", "severity"),
         Index("idx_alarm_created", "created_at"),
-        Index("idx_alarm_resolved", "resolved"),
+        Index("idx_alarm_status", "status"),
+    )
+
+
+class Interface(Base):
+    """Network interfaces status (Current state)"""
+    __tablename__ = "interfaces"
+    
+    id = Column(Integer, primary_key=True)
+    device_id = Column(Integer, ForeignKey("devices.id"), nullable=False)
+    name = Column(String(255), nullable=False)
+    ip_address = Column(String(45), nullable=True)
+    status = Column(String(50))
+    in_octets = Column(BigInteger, default=0)
+    out_octets = Column(BigInteger, default=0)
+    in_errors = Column(BigInteger, default=0)
+    out_errors = Column(BigInteger, default=0)
+    speed = Column(BigInteger, default=0)
+    mtu = Column(Integer, default=1500)
+    type = Column(String(100))
+    
+    last_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (
+        Index("idx_interface_device", "device_id"),
+        Index("idx_interface_name", "name"),
     )
 
 
@@ -107,9 +134,9 @@ class InterfaceMetric(Base):
     
     admin_status = Column(String(10))  # "up", "down"
     oper_status = Column(String(10))   # "up", "down"
-    speed = Column(Integer)  # bps
-    in_octets = Column(Integer)
-    out_octets = Column(Integer)
+    speed = Column(BigInteger)  # bps
+    in_octets = Column(BigInteger)
+    out_octets = Column(BigInteger)
     
     collected_at = Column(DateTime, default=datetime.utcnow)
     

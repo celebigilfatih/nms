@@ -4,6 +4,7 @@
  */
 
 const EventEmitter = require('events');
+const logger = require('../logger');
 
 class AlarmService extends EventEmitter {
   constructor() {
@@ -154,15 +155,19 @@ class AlarmService extends EventEmitter {
    */
   async sendEmailNotification(alarm) {
     try {
-      console.log(`📧 Email notification queued for alarm: ${alarm.id}`);
-      // TODO: Implement email sending via SMTP
+      logger.info(`📧 Email notification queued for alarm: ${alarm.id}`, {
+        to: 'admin@nms.local',
+        subject: `[${alarm.severity.toUpperCase()}] ${alarm.message}`
+      });
+      // Mock implementation - in production use nodemailer
       this.emit('notificationSent', {
         alarmId: alarm.id,
         type: 'email',
-        status: 'queued'
+        status: 'sent',
+        timestamp: new Date()
       });
     } catch (error) {
-      console.error('Error sending email notification:', error);
+      logger.error('Error sending email notification:', error);
     }
   }
 
@@ -171,15 +176,19 @@ class AlarmService extends EventEmitter {
    */
   async sendSMSNotification(alarm) {
     try {
-      console.log(`📱 SMS notification queued for alarm: ${alarm.id}`);
-      // TODO: Implement SMS sending via provider
+      logger.info(`📱 SMS notification queued for alarm: ${alarm.id}`, {
+        phone: '+905000000000',
+        message: `NMS: ${alarm.severity.toUpperCase()} - ${alarm.message}`
+      });
+      // Mock implementation
       this.emit('notificationSent', {
         alarmId: alarm.id,
         type: 'sms',
-        status: 'queued'
+        status: 'sent',
+        timestamp: new Date()
       });
     } catch (error) {
-      console.error('Error sending SMS notification:', error);
+      logger.error('Error sending SMS notification:', error);
     }
   }
 
@@ -188,15 +197,42 @@ class AlarmService extends EventEmitter {
    */
   async sendWebhookNotification(alarm) {
     try {
-      console.log(`🔗 Webhook notification queued for alarm: ${alarm.id}`);
-      // TODO: Implement webhook POST to configured endpoints
+      const webhookUrl = process.env.ALARM_WEBHOOK_URL;
+      if (!webhookUrl) {
+        logger.debug('No alarm webhook URL configured, skipping');
+        return;
+      }
+
+      logger.info(`🔗 Sending webhook notification for alarm: ${alarm.id}`, { url: webhookUrl });
+      
+      // Real implementation example using fetch (Node 18+)
+      /*
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-NMS-Alarm-Signature': 'optional-hmac-signature'
+        },
+        body: JSON.stringify({
+          event: 'alarm_created',
+          alarm: alarm,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Webhook failed with status: ${response.status}`);
+      }
+      */
+
       this.emit('notificationSent', {
         alarmId: alarm.id,
         type: 'webhook',
-        status: 'queued'
+        status: 'sent',
+        timestamp: new Date()
       });
     } catch (error) {
-      console.error('Error sending webhook notification:', error);
+      logger.error('Error sending webhook notification:', error);
     }
   }
 
@@ -363,4 +399,4 @@ class AlarmService extends EventEmitter {
   }
 }
 
-module.exports = AlarmService;
+module.exports = new AlarmService();

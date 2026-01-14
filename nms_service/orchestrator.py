@@ -37,6 +37,7 @@ class NMSOrchestrator:
         self.poller = SNMPPoller()
         self.alarm_engine = AlarmEngine()
         self.api_client = APIClient()
+        self.last_inventory_poll: Dict[int, datetime] = {}
         
         # Initialize database
         db_manager.init_db()
@@ -99,79 +100,95 @@ class NMSOrchestrator:
                     device_name = session_obj.device_name
                     logger.debug(f"Polling device {device_name}")
                     
+                    device_is_online = False
+                    
                     # Poll interfaces
                     try:
                         interfaces = self.poller.poll_interfaces(device_id)
                         
                         if interfaces:
+                            device_is_online = True
                             # Device is online - mark it as such
                             self.api_client.update_device_status(device_id, "online")
                             device_repo = DeviceRepository(session)
                             device_repo.update_status(device_id, "online")
+                            
+                            # Check if inventory polling is due
+                            now = datetime.utcnow()
+                            last_poll = self.last_inventory_poll.get(device_id)
+                            interval = timedelta(seconds=config.polling.inventory_poll_interval)
+                            
+                            if not last_poll or (now - last_poll) > interval:
+                                try:
+                                    inventory = self.poller.poll_inventory(device_id)
+                                    if inventory:
+                                        vendor_model = inventory.model
+                                        if inventory.vendor and inventory.model:
+                                            vendor_model = f"{inventory.vendor} {inventory.model}"
+                                        elif inventory.vendor:
+                                            vendor_model = inventory.vendor
+                                            
+                                        metrics_repo.save_inventory(
+                                            device_id=device_id,
+                                            sys_descr=inventory.sys_descr,
+                                            serial_number=inventory.serial_number,
+                                            firmware_version=inventory.firmware_version,
+                                            vendor_model=vendor_model
+                                        )
+                                        self.last_inventory_poll[device_id] = now
+                                        logger.info(f"Updated inventory for {device_name}")
+                                except Exception as e:
+                                    logger.error(f"Inventory poll failed for {device_name}: {e}")
+                            
+                            for iface_metric in interfaces:
+                                # Generate alarms for interface
+                                alarms = self.alarm_engine.evaluate_interface_metric(iface_metric)
+                            
+                                for alarm in alarms:
+                                    alarm.device_name = device_name
+                                    # Store in database
+                                    alarm_repo.create(alarm)
+                                    # Send to API
+                                    self.api_client.create_alarm(alarm)
+                            
+                                # Store metrics in database
+                                metrics_repo.save_interface_metrics(
+                                    device_id=iface_metric.device_id,
+                                    interface_index=iface_metric.interface_index,
+                                    interface_name=iface_metric.interface_name,
+                                    description=iface_metric.description,
+                                    admin_status=iface_metric.admin_status,
+                                    oper_status=iface_metric.oper_status,
+                                    speed=iface_metric.speed,
+                                    in_octets=iface_metric.in_octets,
+                                    out_octets=iface_metric.out_octets,
+                                    mtu=iface_metric.mtu,
+                                )
+                                
+                                # Note: Interface metrics are no longer sent to the generic /metrics API 
+                                # to avoid cluttering the System Metrics dashboard. They are available 
+                                # via the interfaces table.
                         
-                        for iface_metric in interfaces:
-                            # Generate alarms for interface
-                            alarms = self.alarm_engine.evaluate_interface_metric(iface_metric)
-                            
-                            for alarm in alarms:
-                                alarm.device_name = device_name
-                                # Store in database
-                                alarm_repo.create(alarm)
-                                # Send to API
-                                self.api_client.create_alarm(alarm)
-                            
-                            # Store metrics
-                            metrics_repo.save_interface_metrics(
-                                device_id=iface_metric.device_id,
-                                interface_index=iface_metric.interface_index,
-                                interface_name=iface_metric.interface_name,
-                                description=iface_metric.description,
-                                admin_status=iface_metric.admin_status,
-                                oper_status=iface_metric.oper_status,
-                                speed=iface_metric.speed,
-                                in_octets=iface_metric.in_octets,
-                                out_octets=iface_metric.out_octets,
+                            logger.debug(
+                                f"Polled {len(interfaces)} interfaces for {device_name}"
                             )
-                            
-                            # Send to API
-                            self.api_client.send_metrics(
-                                device_id=device_id,
-                                metric_type="interface",
-                                data={
-                                    "interface_index": iface_metric.interface_index,
-                                    "interface_name": iface_metric.interface_name,
-                                    "admin_status": iface_metric.admin_status,
-                                    "oper_status": iface_metric.oper_status,
-                                    "speed": iface_metric.speed,
-                                },
-                            )
-                        
-                        logger.debug(
-                            f"Polled {len(interfaces)} interfaces for {device_name}"
-                        )
                         
                     except Exception as e:
                         logger.error(f"Interface polling failed for {device_name}: {e}")
-                        # Mark device as offline if interface poll fails
-                        try:
-                            self.api_client.update_device_status(device_id, "offline")
-                            device_repo = DeviceRepository(session)
-                            device_repo.update_status(device_id, "offline")
-                        except:
-                            pass
                     
                     # Poll device health
                     try:
                         device_repo = DeviceRepository(session)
-                        device = device_repo.get_by_id(device_id)
+                        device_db_obj = device_repo.get_by_id(device_id)
                         
-                        if device:
+                        if device_db_obj:
                             health_metric = self.poller.poll_device_health(
                                 device_id,
-                                device.vendor,
+                                device_db_obj.vendor,
                             )
                             
                             if health_metric:
+                                device_is_online = True
                                 # Device is online - update status
                                 self.api_client.update_device_status(device_id, "online")
                                 device_repo.update_status(device_id, "online")
@@ -207,19 +224,19 @@ class NMSOrchestrator:
                                         "uptime_seconds": health_metric.uptime_seconds,
                                     },
                                 )
-                            else:
-                                # Health poll failed - mark device as offline
-                                self.api_client.update_device_status(device_id, "offline")
-                                device_repo.update_status(device_id, "offline")
                     
                     except Exception as e:
                         logger.error(f"Health polling failed for {device_name}: {e}")
-                        # Mark device as offline if health check failed
+
+                    # If both failed, mark offline
+                    if not device_is_online:
                         try:
+                            logger.debug(f"Device {device_name} is offline, updating status")
                             self.api_client.update_device_status(device_id, "offline")
+                            device_repo = DeviceRepository(session)
                             device_repo.update_status(device_id, "offline")
-                        except:
-                            pass
+                        except Exception as e:
+                            logger.error(f"Failed to mark device {device_id} as offline: {e}")
                 
                 except Exception as e:
                     logger.error(f"Error polling device {device_id}: {e}")

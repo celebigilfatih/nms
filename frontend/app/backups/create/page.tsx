@@ -125,7 +125,7 @@ export default function CreateBackupPage() {
         {/* Loading State */}
         {devicesLoading && (
           <div className="p-6 bg-slate-900/50 border border-slate-700 rounded-lg flex items-center gap-3">
-            <i className="fas fa-spinner fa-spin text-lg text-purple-400" />
+            <i className="fas fa-spinner fa-spin text-lg text-orange-400" />
             <p className="text-slate-300">Loading devices...</p>
           </div>
         )}
@@ -143,11 +143,11 @@ export default function CreateBackupPage() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <p className="text-sm text-slate-400">Creating backup...</p>
-                <p className="text-sm text-purple-400">{progress}%</p>
+                <p className="text-sm text-orange-400">{progress}%</p>
               </div>
               <div className="w-full bg-slate-900/50 rounded-full h-2">
                 <div
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all"
+                  className="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -171,7 +171,7 @@ export default function CreateBackupPage() {
                 onChange={handleChange}
                 className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                   errors.device_id ? 'border-red-500' : 'border-slate-700'
-                } text-white focus:outline-none focus:border-purple-500 transition`}
+                } text-white focus:outline-none focus:border-orange-500 transition`}
               >
                 <option value="">Choose a device...</option>
                 {devices.map(device => (
@@ -202,7 +202,7 @@ export default function CreateBackupPage() {
                   name="backup_type"
                   value={formData.backup_type}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                 >
                   <option value="running-config">Running Config</option>
                   <option value="startup-config">Startup Config</option>
@@ -223,7 +223,7 @@ export default function CreateBackupPage() {
                   placeholder="e.g., Router-01-20251226-backup"
                   className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                     errors.backup_name ? 'border-red-500' : 'border-slate-700'
-                  } text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition`}
+                  } text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition`}
                 />
                 {errors.backup_name && (
                   <p className="text-red-400 text-xs mt-1">{errors.backup_name}</p>
@@ -240,7 +240,7 @@ export default function CreateBackupPage() {
                   onChange={handleChange}
                   placeholder="Add notes about this backup..."
                   rows={3}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition resize-none"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition resize-none"
                 />
               </div>
             </div>
@@ -262,7 +262,7 @@ export default function CreateBackupPage() {
                   name="schedule"
                   value={formData.schedule}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                 >
                   <option value="once">Run Now</option>
                   <option value="daily">Daily</option>
@@ -283,7 +283,7 @@ export default function CreateBackupPage() {
                     onChange={handleChange}
                     className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                       errors.schedule_time ? 'border-red-500' : 'border-slate-700'
-                    } text-white focus:outline-none focus:border-purple-500 transition`}
+                    } text-white focus:outline-none focus:border-orange-500 transition`}
                   />
                   {errors.schedule_time && (
                     <p className="text-red-400 text-xs mt-1">{errors.schedule_time}</p>

@@ -8,6 +8,7 @@ const cors = require('cors');
 const database = require('./src/database');
 const logger = require('./src/logger');
 const apiRoutes = require('./src/routes/api');
+const reportsRoutes = require('./src/routes/reports');
 const SNMPPollingService = require('./src/services/polling');
 const deviceRepository = require('./src/services/deviceRepository');
 
@@ -42,6 +43,7 @@ app.use((req, res, next) => {
 
 // API routes
 app.use('/api', apiRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -92,8 +94,9 @@ async function start() {
     logger.info('Initializing database connection...');
     await database.init();
     
-    // Initialize and start polling service
+    // Initialize and start polling service (DISABLED - Using nms_service Python poller)
     let pollingService = null;
+    /*
     try {
       const activeDevices = await deviceRepository.getActive();
       pollingService = new SNMPPollingService({
@@ -105,6 +108,7 @@ async function start() {
       logger.warn('Failed to start polling service', { error: error.message });
       // Don't fail startup if polling fails
     }
+    */
     
     // Start Express server
     const server = app.listen(PORT, HOST, () => {

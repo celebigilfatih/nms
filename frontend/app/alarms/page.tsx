@@ -135,7 +135,7 @@ export default function AlarmsPage() {
           <button
             onClick={loadAlarms}
             disabled={loading}
-            className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition font-medium"
+            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition font-medium"
           >
             <i className={`fas fa-sync ${loading ? 'fa-spin' : ''}`} />
             Refresh
@@ -187,7 +187,7 @@ export default function AlarmsPage() {
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
           >
             <option value="all">All Severity</option>
             <option value="critical">Critical</option>
@@ -198,7 +198,7 @@ export default function AlarmsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>

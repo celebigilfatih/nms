@@ -161,7 +161,7 @@ class APIClient:
         try:
             payload = {"connection_status": status}
             
-            response = self.client.patch(
+            response = self.client.put(
                 self._build_url(f"/devices/{device_id}"),
                 json=payload,
             )
@@ -198,7 +198,7 @@ class APIClient:
         try:
             payload = {
                 "device_id": device_id,
-                "type": metric_type,
+                "metric_type": metric_type,
                 "data": data,
                 "timestamp": datetime.utcnow().isoformat(),
             }

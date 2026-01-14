@@ -105,11 +105,11 @@ export default function BackupSchedulesPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-400 text-sm">Protected</p>
-                <p className="text-3xl font-bold text-purple-400 mt-1">
+                <p className="text-3xl font-bold text-orange-400 mt-1">
                   {schedules.filter(s => s.password_protected).length}
                 </p>
               </div>
-              <i className="fas fa-lock text-3xl text-purple-400" />
+              <i className="fas fa-lock text-3xl text-orange-400" />
             </div>
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function BackupSchedulesPage() {
             </div>
           ) : (
             schedules.map(schedule => (
-              <div key={schedule.id} className="card p-6 hover:border-purple-500/50 transition">
+              <div key={schedule.id} className="card p-6 hover:border-orange-500/50 transition">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">

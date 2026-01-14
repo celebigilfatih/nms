@@ -17,6 +17,7 @@ from nms_service.core.models import (
 from nms_service.database.models import (
     Alarm as AlarmDB,
     Device as DeviceDB,
+    Interface as InterfaceDB,
     InterfaceMetric as InterfaceMetricDB,
     DeviceHealthMetric as DeviceHealthMetricDB,
     DeviceInventory as DeviceInventoryDB,
@@ -46,12 +47,11 @@ class AlarmRepository:
         try:
             db_alarm = AlarmDB(
                 device_id=alarm.device_id,
-                device_name=alarm.device_name,
-                type=alarm.type,
+                alarm_code=alarm.type.value if hasattr(alarm.type, 'value') else str(alarm.type),
                 severity=alarm.severity,
                 message=alarm.message,
-                acknowledged=alarm.acknowledged,
-                metadata=alarm.metadata,
+                status="active",
+                alarm_metadata=alarm.metadata,
             )
             self.session.add(db_alarm)
             self.session.commit()
@@ -89,7 +89,7 @@ class AlarmRepository:
         Returns:
             List of AlarmDB records
         """
-        query = self.session.query(AlarmDB).filter(AlarmDB.resolved == False)
+        query = self.session.query(AlarmDB).filter(AlarmDB.status == "active")
         
         if device_id:
             query = query.filter(AlarmDB.device_id == device_id)
@@ -140,9 +140,11 @@ class AlarmRepository:
         try:
             alarm = self.get_by_id(alarm_id)
             if alarm:
-                alarm.acknowledged = True
+                alarm.status = "acknowledged"
                 alarm.acknowledged_at = datetime.utcnow()
-                alarm.acknowledged_by = acknowledged_by
+                # Handle user ID if provided as string (simplified for now)
+                if isinstance(acknowledged_by, int):
+                    alarm.acknowledged_by = acknowledged_by
                 self.session.commit()
                 logger.info(f"Acknowledged alarm {alarm_id}")
                 return True
@@ -164,7 +166,7 @@ class AlarmRepository:
         try:
             alarm = self.get_by_id(alarm_id)
             if alarm:
-                alarm.resolved = True
+                alarm.status = "resolved"
                 alarm.resolved_at = datetime.utcnow()
                 self.session.commit()
                 logger.info(f"Resolved alarm {alarm_id}")
@@ -184,8 +186,9 @@ class AlarmRepository:
         Returns:
             List of AlarmDB records
         """
+        type_str = alarm_type.value if hasattr(alarm_type, 'value') else str(alarm_type)
         return self.session.query(AlarmDB).filter(
-            and_(AlarmDB.resolved == False, AlarmDB.type == alarm_type)
+            and_(AlarmDB.status == "active", AlarmDB.alarm_code == type_str)
         ).all()
 
 
@@ -317,8 +320,9 @@ class MetricsRepository:
         speed: int,
         in_octets: int,
         out_octets: int,
+        mtu: int = 1500,
     ) -> InterfaceMetricDB:
-        """Save interface metrics
+        """Save interface metrics and update current status
         
         Args:
             device_id: Device ID
@@ -330,11 +334,41 @@ class MetricsRepository:
             speed: Interface speed
             in_octets: Input octets
             out_octets: Output octets
+            mtu: Maximum Transmission Unit
             
         Returns:
             Created InterfaceMetricDB record
         """
         try:
+            # 1. Update/Create entry in 'interfaces' table (Current State)
+            # Use description as the primary name if it looks like a real name (e.g. Gi1/0/1)
+            # ifName is usually better for the 'name' column in 'interfaces' table
+            
+            interface_record = self.session.query(InterfaceDB).filter(
+                and_(InterfaceDB.device_id == device_id, InterfaceDB.name == description)
+            ).first()
+
+            if interface_record:
+                interface_record.status = oper_status
+                interface_record.speed = speed
+                interface_record.in_octets = in_octets
+                interface_record.out_octets = out_octets
+                interface_record.mtu = mtu
+                interface_record.last_updated = datetime.utcnow()
+            else:
+                interface_record = InterfaceDB(
+                    device_id=device_id,
+                    name=description,
+                    status=oper_status,
+                    speed=speed,
+                    in_octets=in_octets,
+                    out_octets=out_octets,
+                    mtu=mtu,
+                    type="ethernetCsmacd" # Default
+                )
+                self.session.add(interface_record)
+
+            # 2. Save to 'interface_metrics' table (Historical)
             metric = InterfaceMetricDB(
                 device_id=device_id,
                 interface_index=interface_index,
@@ -414,3 +448,52 @@ class MetricsRepository:
                 DeviceHealthMetricDB.collected_at >= since,
             )
         ).order_by(desc(DeviceHealthMetricDB.collected_at)).all()
+
+    def save_inventory(
+        self,
+        device_id: int,
+        sys_descr: str,
+        serial_number: Optional[str] = None,
+        firmware_version: Optional[str] = None,
+        vendor_model: Optional[str] = None,
+    ) -> DeviceInventoryDB:
+        """Save or update device inventory information
+        
+        Args:
+            device_id: Device ID
+            sys_descr: System description
+            serial_number: Serial number
+            firmware_version: Firmware/OS version
+            vendor_model: Vendor and model name
+            
+        Returns:
+            Inventory record
+        """
+        try:
+            # Check if record exists
+            inventory = self.session.query(DeviceInventoryDB).filter(
+                DeviceInventoryDB.device_id == device_id
+            ).first()
+            
+            if inventory:
+                inventory.sys_descr = sys_descr
+                inventory.serial_number = serial_number
+                inventory.firmware_version = firmware_version
+                inventory.vendor_model = vendor_model
+                inventory.collected_at = datetime.utcnow()
+            else:
+                inventory = DeviceInventoryDB(
+                    device_id=device_id,
+                    sys_descr=sys_descr,
+                    serial_number=serial_number,
+                    firmware_version=firmware_version,
+                    vendor_model=vendor_model,
+                )
+                self.session.add(inventory)
+            
+            self.session.commit()
+            return inventory
+        except Exception as e:
+            self.session.rollback()
+            logger.error(f"Failed to save device inventory: {e}")
+            raise

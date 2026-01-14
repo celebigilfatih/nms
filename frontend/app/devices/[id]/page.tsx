@@ -46,6 +46,10 @@ interface Device {
   notes?: string;
   metrics?: any;
   interfaces?: Interface[];
+  sys_descr?: string;
+  serial_number?: string;
+  firmware_version?: string;
+  vendor_model?: string;
 }
 
 export default function DeviceDetailPage() {
@@ -116,7 +120,7 @@ export default function DeviceDetailPage() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[400px]">
-          <i className="fas fa-spinner fa-spin text-3xl text-purple-400" />
+          <i className="fas fa-spinner fa-spin text-3xl text-orange-500" />
         </div>
       </Layout>
     );
@@ -179,7 +183,7 @@ export default function DeviceDetailPage() {
 
             {/* Vendor */}
             <div className="flex items-center gap-2">
-              <i className="fas fa-building text-purple-400 text-lg" />
+              <i className="fas fa-building text-orange-400 text-lg" />
               <div>
                 <p className="text-slate-400 text-xs uppercase tracking-wider">Vendor</p>
                 <p className="text-white font-semibold">{device.vendor || 'N/A'}</p>
@@ -230,6 +234,44 @@ export default function DeviceDetailPage() {
           </div>
         </div>
 
+        {/* Device Properties / Inventory */}
+        {(device.vendor_model || device.serial_number || device.firmware_version || device.sys_descr) && (
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <i className="fas fa-info-circle text-orange-400" />
+              Device Properties
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {device.vendor_model && (
+                <div className="card p-6 border-l-4 border-orange-500">
+                  <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-1">Model</p>
+                  <p className="text-xl font-bold text-white">{device.vendor_model}</p>
+                </div>
+              )}
+              {device.serial_number && (
+                <div className="card p-6 border-l-4 border-blue-500">
+                  <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-1">Serial Number</p>
+                  <p className="text-xl font-bold text-white">{device.serial_number}</p>
+                </div>
+              )}
+              {device.firmware_version && (
+                <div className="card p-6 border-l-4 border-cyan-500">
+                  <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-1">Firmware Version</p>
+                  <p className="text-xl font-bold text-white">{device.firmware_version}</p>
+                </div>
+              )}
+              {device.sys_descr && (
+                <div className="card p-6 border-l-4 border-slate-500 col-span-full">
+                  <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-1">System Description</p>
+                  <p className="text-sm text-slate-300 font-mono bg-slate-900/50 p-3 rounded-lg mt-2 whitespace-pre-wrap">
+                    {device.sys_descr}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Performance Metrics */}
         {device.metrics && device.metrics.length > 0 && (
           <div>
@@ -247,7 +289,7 @@ export default function DeviceDetailPage() {
                 
                 if (metric.metric_type === 'cpu') {
                   icon = 'fas fa-microchip';
-                  color = 'text-purple-400';
+                  color = 'text-orange-400';
                 } else if (metric.metric_type === 'memory') {
                   icon = 'fas fa-memory';
                   color = 'text-blue-400';

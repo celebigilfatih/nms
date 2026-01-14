@@ -15,6 +15,7 @@ const navigation = [
   { href: '/devices/add', label: 'Add Device', icon: 'fa-plus' },
   { href: '/backups', label: 'Backups', icon: 'fa-database' },
   { href: '/alarms', label: 'Alarms', icon: 'fa-bell' },
+  { href: '/vendors', label: 'Vendors', icon: 'fa-industry' },
   { href: '/reports', label: 'Reports', icon: 'fa-chart-bar' },
   { href: '/settings', label: 'Settings', icon: 'fa-cog' },
 ];
@@ -34,7 +35,7 @@ export default function Layout({ children }: LayoutProps) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <i className="fas fa-spinner fa-spin text-4xl text-purple-400 mb-4" />
+          <i className="fas fa-spinner fa-spin text-4xl text-orange-500 mb-4" />
           <p className="text-slate-400">Loading...</p>
         </div>
       </div>

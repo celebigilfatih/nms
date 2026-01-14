@@ -5,6 +5,7 @@
 
 const database = require('../database');
 const logger = require('../logger');
+const alarmService = require('./alarms');
 
 class AlarmRepository {
   /**
@@ -110,6 +111,15 @@ class AlarmRepository {
 
       const result = await database.queryOne(query, params);
       logger.info('Alarm created', { alarm_id: result.id, device_id, severity });
+      
+      // Trigger notifications via AlarmService
+      try {
+        await alarmService.generateAlarm(result);
+      } catch (serviceError) {
+        logger.error('Failed to trigger alarm notifications', { error: serviceError.message });
+        // Don't fail the repository create operation if notifications fail
+      }
+      
       return result;
     } catch (error) {
       logger.error('Failed to create alarm', { error: error.message });

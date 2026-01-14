@@ -159,7 +159,7 @@ export default function VendorsPage() {
 
         {/* Message */}
         {message && (
-          <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg text-blue-400 text-sm">
+          <div className="p-4 bg-orange-500/10 border border-orange-500/50 rounded-lg text-orange-400 text-sm">
             {message}
           </div>
         )}
@@ -168,7 +168,7 @@ export default function VendorsPage() {
           {/* Add New Vendor Form */}
           <div className="card p-6">
             <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <i className="fas fa-plus-circle text-green-400"></i>
+              <i className="fas fa-plus-circle text-orange-400"></i>
               Add New Vendor
             </h2>
             <form onSubmit={handleAddVendor} className="space-y-4">
@@ -236,7 +236,7 @@ export default function VendorsPage() {
             {/* Filters */}
             <div className="card p-6 mb-6">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <i className="fas fa-filter text-blue-400"></i>
+                <i className="fas fa-filter text-orange-400"></i>
                 Filters
               </h2>
               <div className="space-y-4">
@@ -284,61 +284,72 @@ export default function VendorsPage() {
               </div>
             </div>
 
-            {/* Vendors Grid */}
-            <div className="space-y-3">
-              {isLoading ? (
-                <div className="text-center py-8 text-slate-400">Loading vendors...</div>
-              ) : filteredVendors.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">No vendors found</div>
-              ) : (
-                filteredVendors.map((vendor) => (
-                  <div
-                    key={vendor.id}
-                    className="card p-4 flex items-center justify-between hover:bg-slate-900/60 transition"
-                  >
-                    <div className="flex-1">
-                      <h3 className="font-bold text-white flex items-center gap-2">
-                        {vendor.display_name}
-                        {vendor.active ? (
-                          <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">
-                            Active
-                          </span>
-                        ) : (
-                          <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">
-                            Inactive
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-sm text-slate-400 mt-1">
-                        {vendor.category}
-                        {vendor.description && ` • ${vendor.description}`}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleToggleStatus(vendor.id, vendor.active)}
-                        className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
-                          vendor.active
-                            ? 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
-                            : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                        }`}
-                        title={vendor.active ? 'Click to deactivate' : 'Click to activate'}
+            {/* Vendors Table */}
+            <div className="card overflow-hidden">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-900/50 border-b border-slate-800">
+                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Vendor Info</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-10 text-center text-slate-400">Loading vendors...</td>
+                    </tr>
+                  ) : filteredVendors.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-10 text-center text-slate-400">No vendors found</td>
+                    </tr>
+                  ) : (
+                    filteredVendors.map((vendor) => (
+                      <tr
+                        key={vendor.id}
+                        className="hover:bg-slate-900/30 transition-colors group"
                       >
-                        <i className={`fas ${vendor.active ? 'fa-toggle-on' : 'fa-toggle-off'}`}></i>
-                        {vendor.active ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteVendor(vendor.id)}
-                        className="px-4 py-2 rounded-lg font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition flex items-center gap-2"
-                        title="Delete vendor"
-                      >
-                        <i className="fas fa-trash-alt"></i>
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${vendor.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-slate-600'}`}></div>
+                            <div>
+                              <div className="font-bold text-white">{vendor.display_name}</div>
+                              <div className="text-xs text-slate-500 font-mono">{vendor.name}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-slate-300 bg-slate-800/50 px-2 py-1 rounded border border-slate-700">
+                            {vendor.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleToggleStatus(vendor.id, vendor.active)}
+                              className={`p-2 rounded-lg transition-colors ${
+                                vendor.active
+                                  ? 'bg-orange-500/10 text-orange-400 hover:bg-orange-500/20'
+                                  : 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
+                              }`}
+                              title={vendor.active ? 'Deactivate' : 'Activate'}
+                            >
+                              <i className={`fas ${vendor.active ? 'fa-toggle-on' : 'fa-toggle-off'}`}></i>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteVendor(vendor.id)}
+                              className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                              title="Delete"
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
 
             {/* Statistics */}

@@ -35,7 +35,16 @@ class DeviceBackupService {
    */
   static async getDeviceConfiguration(deviceInfo) {
     try {
-      const { ip_address, vendor = 'hp', ssh_user = 'buski', ssh_password = 'bbs*2018' } = deviceInfo;
+      const { 
+        ip_address, 
+        vendor = 'hp', 
+        ssh_username, 
+        ssh_password 
+      } = deviceInfo;
+      
+      // Use DB credentials if available, otherwise fallback to defaults
+      const ssh_user = ssh_username || 'buski';
+      const final_password = ssh_password || 'bbs*2018';
       
       if (!ip_address) {
         throw new Error('Device IP address is required');
@@ -52,9 +61,8 @@ class DeviceBackupService {
       logger.debug('Using configuration command', { vendor, command: configCommand });
       
       // Use expect script for interactive SSH session
-      // This handles HP switch behavior which requires interactive terminal
-      // Pass command-line arguments properly quoted
-      const command = `/app/get_device_config.sh ${ip_address} ${ssh_user} '${ssh_password}' '${configCommand}'`;
+      // This handles terminal pagination (--More--) by executing 'terminal length 0'
+      const command = `expect /app/ssh_get_config.exp ${ip_address} ${ssh_user} '${final_password}' '${configCommand}'`;
       
       logger.debug('Executing SSH command', { 
         ip: ip_address,
@@ -176,8 +184,18 @@ class DeviceBackupService {
         hasInterface: cleanedOutput ? cleanedOutput.toLowerCase().includes('interface') : false
       });
 
-      // Check if we got actual configuration output
+      // Enhanced validation: check if we got actual configuration output or just error messages
       if (cleanedOutput && cleanedOutput.trim().length > 100) {
+        // Check for error indicators in the captured output
+        const hasErrors = cleanedOutput.toLowerCase().includes('timeout') || 
+                          cleanedOutput.toLowerCase().includes('connect to host') ||
+                          cleanedOutput.toLowerCase().includes('permission denied') ||
+                          cleanedOutput.toLowerCase().includes('error:');
+        
+        if (hasErrors) {
+           throw new Error(`SSH connection failed: ${cleanedOutput.split('\n')[0]}`);
+        }
+
         // Check for key indicators of real config
         const hasConfigIndicators = cleanedOutput.toLowerCase().includes('hostname') || 
                                     cleanedOutput.toLowerCase().includes('interface') || 

@@ -35,7 +35,7 @@ interface AuthSettings {
   audit_settings: Record<string, any>;
 }
 
-type TabType = 'general' | 'users' | 'permissions' | 'authentication' | 'vendors';
+type TabType = 'general' | 'users' | 'permissions' | 'authentication';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -351,7 +351,7 @@ export default function SettingsPage() {
 
         {/* Tabs */}
         <div className="flex gap-2 border-b border-slate-700 flex-wrap">
-          {(['general', 'users', 'permissions', 'authentication', 'vendors'] as TabType[]).map(tab => (
+          {(['general', 'users', 'permissions', 'authentication'] as TabType[]).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -369,9 +369,7 @@ export default function SettingsPage() {
                     ? 'fa-users'
                     : tab === 'permissions'
                     ? 'fa-lock'
-                    : tab === 'authentication'
-                    ? 'fa-shield-alt'
-                    : 'fa-industry'
+                    : 'fa-shield-alt'
                 } mr-2`}
               />
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -421,7 +419,7 @@ export default function SettingsPage() {
                   max="3600"
                   className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                     errors.polling_interval ? 'border-red-500' : 'border-slate-700'
-                  } text-white focus:outline-none focus:border-purple-500 transition`}
+                  } text-white focus:outline-none focus:border-orange-500 transition`}
                 />
                 {errors.polling_interval && (
                   <p className="text-red-400 text-xs mt-1">{errors.polling_interval}</p>
@@ -484,7 +482,7 @@ export default function SettingsPage() {
             {/* Data Retention */}
             <div>
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <i className="fas fa-database text-purple-400" />
+                <i className="fas fa-database text-orange-400" />
                 Data Retention
               </h2>
               <input
@@ -526,7 +524,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition"
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition"
               >
                 {loading && <i className="fas fa-spinner fa-spin" />}
                 Save Settings
@@ -577,7 +575,7 @@ export default function SettingsPage() {
             {!showAddUserForm && (
               <button
                 onClick={() => setShowAddUserForm(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition"
+                className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition"
               >
                 <i className="fas fa-plus" />
                 Add New User
@@ -625,7 +623,7 @@ export default function SettingsPage() {
                   <button
                     onClick={handleAddUser}
                     disabled={loading}
-                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 transition"
+                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 transition"
                   >
                     {loading ? 'Adding...' : 'Add User'}
                   </button>
@@ -642,7 +640,7 @@ export default function SettingsPage() {
             {/* Users List */}
             <div className="space-y-3">
               {users.map(u => (
-                <div key={u.id} className="card p-4 hover:border-purple-500/50 transition">
+                <div key={u.id} className="card p-4 hover:border-orange-500/50 transition">
                   {editingUserId === u.id && editingUserData ? (
                     // Edit Mode
                     <div className="space-y-4">
@@ -786,7 +784,7 @@ export default function SettingsPage() {
           <div className="card p-8 space-y-6 max-w-3xl">
             <div>
               <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                <i className="fas fa-lock text-purple-400" />
+                <i className="fas fa-lock text-orange-400" />
                 Role-Based Permissions
               </h2>
               <p className="text-slate-400 mb-6">Define what each role can access and modify</p>
@@ -1007,7 +1005,7 @@ export default function SettingsPage() {
             {/* Login Policy */}
             <div className="card p-6 space-y-4">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <i className="fas fa-sign-in-alt text-purple-400" />
+                <i className="fas fa-sign-in-alt text-orange-400" />
                 Login Policy
               </h2>
 
@@ -1064,40 +1062,11 @@ export default function SettingsPage() {
               <button
                 onClick={handleSaveAuthSettings}
                 disabled={loading}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition"
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition"
               >
                 {loading && <i className="fas fa-spinner fa-spin" />}
                 Save Authentication Settings
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* TAB: Vendors Management */}
-        {activeTab === 'vendors' && (
-          <div className="card p-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <i className="fas fa-industry text-orange-400" />
-                  Vendor Management
-                </h2>
-                <p className="text-slate-400 text-sm mt-2">Manage network device vendors and their active status</p>
-              </div>
-              <a
-                href="/vendors"
-                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:opacity-90 text-white font-semibold rounded-lg transition flex items-center gap-2"
-              >
-                <i className="fas fa-external-link-alt" />
-                Go to Vendor Management
-              </a>
-            </div>
-
-            <div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4">
-              <p className="text-blue-400 text-sm">
-                <i className="fas fa-info-circle mr-2" />
-                Click the button above to manage vendors, control their active/inactive status, add new vendors, and more.
-              </p>
             </div>
           </div>
         )}

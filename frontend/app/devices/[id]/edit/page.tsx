@@ -95,7 +95,7 @@ export default function EditDevicePage() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[400px]">
-          <i className="fas fa-spinner fa-spin text-3xl text-purple-400" />
+          <i className="fas fa-spinner fa-spin text-3xl text-orange-500" />
         </div>
       </Layout>
     );
@@ -153,7 +153,7 @@ export default function EditDevicePage() {
                   value={formData.name || ''}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                 />
               </div>
 
@@ -165,7 +165,7 @@ export default function EditDevicePage() {
                   value={formData.ip_address || ''}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                 />
               </div>
 
@@ -176,7 +176,7 @@ export default function EditDevicePage() {
                   value={formData.vendor || ''}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                 >
                   <option value="">Select Vendor</option>
                   <option value="hp">HP</option>
@@ -194,7 +194,7 @@ export default function EditDevicePage() {
                   value={formData.device_type || ''}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                 >
                   <option value="">Select Type</option>
                   <option value="switch">Switch</option>
@@ -212,7 +212,7 @@ export default function EditDevicePage() {
                   name="location"
                   value={formData.location || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                   placeholder="e.g., Data Center 1"
                 />
               </div>
@@ -223,7 +223,7 @@ export default function EditDevicePage() {
                   name="snmp_version"
                   value={formData.snmp_version || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                 >
                   <option value="">Auto-detect</option>
                   <option value="v1">SNMPv1</option>
@@ -239,7 +239,7 @@ export default function EditDevicePage() {
                   name="snmp_community"
                   value={formData.snmp_community || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                   placeholder="public"
                 />
               </div>
@@ -251,7 +251,7 @@ export default function EditDevicePage() {
                   name="snmp_port"
                   value={formData.snmp_port || 161}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                 />
               </div>
             </div>
@@ -263,7 +263,7 @@ export default function EditDevicePage() {
                 value={formData.notes || ''}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                 placeholder="Additional notes about this device..."
               />
             </div>
@@ -284,7 +284,7 @@ export default function EditDevicePage() {
                   name="ssh_username"
                   value={formData.ssh_username || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                   placeholder="e.g., admin"
                 />
               </div>
@@ -296,7 +296,7 @@ export default function EditDevicePage() {
                   name="ssh_password"
                   value={formData.ssh_password || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                   placeholder="Password for backup retrieval"
                 />
               </div>
@@ -313,7 +313,7 @@ export default function EditDevicePage() {
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-6 py-2 rounded-lg transition font-medium"
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 text-white px-6 py-2 rounded-lg transition font-medium"
             >
               {saving ? (
                 <>

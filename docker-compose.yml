@@ -57,6 +57,10 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/app/logs
+      - ./backend/src:/app/src
+      - ./backend/index.js:/app/index.js
+      - ./backend/ssh_get_config.exp:/app/ssh_get_config.exp
+      - ./backend/get_device_config.sh:/app/get_device_config.sh
 
   # Python NMS Service (SNMP Polling & Alarms)
   nms_service:
@@ -95,6 +99,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/app/logs
+      - ./nms_service:/app/nms_service
 
   # Next.js Frontend
   frontend:
@@ -124,6 +129,10 @@ services:
     networks:
       - nms_network
     restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
 
 # Volumes
 volumes:

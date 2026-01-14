@@ -69,7 +69,7 @@ class SNMPSession:
         self.device_name = device_name
         self.ip_address = ip_address
         self.community_string = community_string
-        self.version = version
+        self.version = version or "2c"
         self.port = port
         self.timeout = timeout or config.snmp.snmp_timeout
         self.retries = retries or config.snmp.snmp_retries
@@ -80,19 +80,10 @@ class SNMPSession:
         self._auth: Optional[CommunityData] = None
     
     def _validate_connectivity(self) -> bool:
-        """Test basic connectivity to device"""
-        try:
-            socket.create_connection(
-                (self.ip_address, self.port),
-                timeout=self.timeout
-            ).close()
-            return True
-        except (socket.timeout, socket.error) as e:
-            logger.warning(
-                f"Connectivity check failed for {self.device_name} "
-                f"({self.ip_address}): {e}"
-            )
-            return False
+        """Test basic connectivity to device (UDP check is limited, so we skip TCP check)"""
+        # SNMP uses UDP, so TCP connect check is inappropriate and fails on most devices.
+        # We'll let the actual SNMP GET handle the timeout.
+        return True
     
     def _init_snmp_engine(self) -> None:
         """Initialize SNMP engine and transport"""
@@ -107,11 +98,13 @@ class SNMPSession:
                 retries=self.retries
             )
             
-            if self.version == "2c":
+            logger.debug(f"Initializing SNMP engine with version: '{self.version}'")
+            
+            if self.version in ["2c", "v2c"]:
                 self._auth = CommunityData(self.community_string)
             else:
                 # TODO: Implement SNMP v3 authentication
-                raise NotImplementedError("SNMP v3 not yet implemented")
+                raise NotImplementedError(f"SNMP version '{self.version}' not yet implemented")
             
             logger.debug(
                 f"SNMP engine initialized for {self.device_name} "
@@ -308,9 +301,17 @@ class SNMPSession:
                     )
                     break
                 
+                stop_walk = False
                 for name, value in var_binds:
                     oid_str = str(name)
+                    # Check if we are still within the requested OID subtree
+                    if not oid_str.startswith(oid):
+                        stop_walk = True
+                        break
                     results[oid_str] = self._parse_snmp_value(value)
+                
+                if stop_walk:
+                    break
             
             logger.debug(
                 f"SNMP walk completed for {self.device_name}, "

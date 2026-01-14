@@ -14,11 +14,13 @@ class DeviceRepository {
     try {
       const query = `
         SELECT 
-          id, name, ip_address, vendor, device_type, snmp_version,
-          snmp_port, connection_status, last_polled, last_online,
-          polling_enabled, location, notes, created_at, updated_at
-        FROM devices
-        ORDER BY created_at DESC
+          d.id, d.name, d.ip_address, d.vendor, d.device_type, d.snmp_version,
+          d.snmp_port, d.connection_status, d.last_polled, d.last_online,
+          d.polling_enabled, d.location, d.notes, d.created_at, d.updated_at,
+          i.vendor_model, i.serial_number
+        FROM devices d
+        LEFT JOIN device_inventory i ON d.id = i.device_id
+        ORDER BY d.created_at DESC
       `;
       return await database.queryAll(query);
     } catch (error) {
@@ -34,11 +36,13 @@ class DeviceRepository {
     try {
       const query = `
         SELECT 
-          id, name, ip_address, vendor, device_type, snmp_version,
-          snmp_port, snmp_community, connection_status, last_polled,
-          last_online, polling_enabled, location, notes, created_at, updated_at
-        FROM devices
-        WHERE id = $1
+          d.id, d.name, d.ip_address, d.vendor, d.device_type, d.snmp_version,
+          d.snmp_port, d.snmp_community, d.connection_status, d.last_polled,
+          d.last_online, d.polling_enabled, d.location, d.notes, d.created_at, d.updated_at,
+          i.sys_descr, i.serial_number, i.firmware_version, i.vendor_model
+        FROM devices d
+        LEFT JOIN device_inventory i ON d.id = i.device_id
+        WHERE d.id = $1
       `;
       return await database.queryOne(query, [id]);
     } catch (error) {

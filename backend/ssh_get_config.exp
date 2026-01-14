@@ -1,36 +1,68 @@
 #!/usr/bin/expect -f
-# Script to retrieve HP switch configuration via SSH with interactive mode
+# Script to retrieve network device configuration via SSH with interactive mode
+# Handles pagination (terminal length 0) and various prompts
 
 set ip [lindex $argv 0]
 set user [lindex $argv 1]
 set password [lindex $argv 2]
 set command [lindex $argv 3]
 
-set timeout 15
+# Increase timeout for large configurations
+set timeout 60
 
-spawn sshpass -p "$password" ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o KexAlgorithms=+diffie-hellman-group1-sha1 -o HostKeyAlgorithms=ssh-rsa $user@$ip
+# Ensure output is captured correctly
+log_user 1
+
+# Start SSH connection
+spawn ssh -o ConnectTimeout=15 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+      -o KexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1 \
+      -o HostKeyAlgorithms=+ssh-rsa \
+      $user@$ip
 
 expect {
-    ">" {
-        send "terminal length 0\r"
-        expect ">"
-        send "$command\r"
-        expect ">"
-        send "exit\r"
-        expect eof
+    "password:" {
+        send "$password\r"
+        exp_continue
     }
     "Password:" {
         send "$password\r"
-        expect ">"
+        exp_continue
+    }
+    "Permission denied" {
+        puts "Error: Authentication failed"
+        exit 1
+    }
+    -re "\[>#\]" {
+        # Successfully logged in and found a prompt
+        # 1. Disable pagination
         send "terminal length 0\r"
-        expect ">"
+        expect -re "\[>#\]"
+        
+        # 2. Execute configuration command
         send "$command\r"
-        expect ">"
+        
+        # 3. Wait for the command to finish (looking for the prompt again)
+        # We might need to handle intermediate --More-- if terminal length 0 failed
+        expect {
+            -re "--More--" {
+                send " "
+                exp_continue
+            }
+            -re "\[>#\]" {
+                # Configuration finished
+            }
+        }
+        
+        # 4. Exit gracefully
         send "exit\r"
         expect eof
     }
     timeout {
-        puts "Timeout waiting for device prompt"
+        puts "Error: Timeout waiting for device prompt"
+        exit 1
+    }
+    eof {
+        puts "Error: Connection closed prematurely"
         exit 1
     }
 }

@@ -218,6 +218,26 @@ router.put('/devices/:id', async (req, res) => {
 });
 
 /**
+ * PATCH /api/devices/:id
+ * Partially update a device
+ */
+router.patch('/devices/:id', async (req, res) => {
+  try {
+    const device = await deviceRepository.update(req.params.id, req.body);
+    res.json({
+      success: true,
+      data: device
+    });
+  } catch (error) {
+    logger.error('Failed to patch device', { error: error.message, id: req.params.id });
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
  * DELETE /api/devices/:id
  * Delete a device
  */
@@ -413,6 +433,11 @@ router.get('/metrics/system', async (req, res) => {
  */
 router.post('/metrics', async (req, res) => {
   try {
+    logger.debug('metricsRepository type:', { 
+      type: typeof metricsRepository,
+      hasCreateMetric: !!metricsRepository.createMetric,
+      keys: Object.keys(metricsRepository)
+    });
     const metric = await metricsRepository.createMetric(req.body);
     res.status(201).json({
       success: true,
@@ -903,7 +928,7 @@ router.post('/backups', async (req, res) => {
     // Fetch device information from database
     logger.debug('Fetching device information', { device_id });
     const deviceResult = await database.queryOne(
-      'SELECT id, name, ip_address, vendor, device_type, snmp_community FROM devices WHERE id = $1',
+      'SELECT id, name, ip_address, vendor, device_type, snmp_community, ssh_username, ssh_password FROM devices WHERE id = $1',
       [device_id]
     );
 

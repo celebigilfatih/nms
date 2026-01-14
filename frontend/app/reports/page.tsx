@@ -12,6 +12,12 @@ interface ChartData {
     borderColor: string;
     backgroundColor: string;
   }[];
+  summary?: {
+    avgCpu: number;
+    avgMemory: number;
+    networkTraffic: string;
+    uptime: string;
+  };
 }
 
 export default function ReportsPage() {
@@ -51,7 +57,7 @@ export default function ReportsPage() {
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
           >
             <option value="24h">Last 24 Hours</option>
             <option value="7d">Last 7 Days</option>
@@ -65,7 +71,7 @@ export default function ReportsPage() {
           {/* CPU Performance */}
           <div className="card p-6">
             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <i className="fas fa-microchip text-purple-400" />
+              <i className="fas fa-microchip text-orange-400" />
               CPU Usage
             </h2>
             <div className="h-64 flex items-center justify-center bg-slate-900/50 rounded-lg">
@@ -122,33 +128,33 @@ export default function ReportsPage() {
         {/* Summary Statistics */}
         <div className="card p-8">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <i className="fas fa-chart-bar text-purple-400" />
+            <i className="fas fa-chart-bar text-orange-400" />
             Summary Statistics
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
               <p className="text-slate-400 text-sm">Avg CPU Usage</p>
-              <p className="text-3xl font-bold text-purple-400 mt-2">45.2%</p>
-              <p className="text-xs text-slate-500 mt-1">↓ 2.3% from previous period</p>
+              <p className="text-3xl font-bold text-orange-400 mt-2">{chartData?.summary?.avgCpu || 0}%</p>
+              <p className="text-xs text-slate-500 mt-1">Real-time aggregate</p>
             </div>
 
             <div>
               <p className="text-slate-400 text-sm">Avg Memory Usage</p>
-              <p className="text-3xl font-bold text-blue-400 mt-2">62.8%</p>
-              <p className="text-xs text-slate-500 mt-1">↑ 1.5% from previous period</p>
+              <p className="text-3xl font-bold text-blue-400 mt-2">{chartData?.summary?.avgMemory || 0}%</p>
+              <p className="text-xs text-slate-500 mt-1">Real-time aggregate</p>
             </div>
 
             <div>
               <p className="text-slate-400 text-sm">Network In/Out</p>
-              <p className="text-3xl font-bold text-green-400 mt-2">1.2 GB/s</p>
-              <p className="text-xs text-slate-500 mt-1">↑ 5.8% from previous period</p>
+              <p className="text-3xl font-bold text-green-400 mt-2">{chartData?.summary?.networkTraffic || '0 GB/s'}</p>
+              <p className="text-xs text-slate-500 mt-1">Current throughput</p>
             </div>
 
             <div>
               <p className="text-slate-400 text-sm">System Uptime</p>
-              <p className="text-3xl font-bold text-yellow-400 mt-2">99.8%</p>
-              <p className="text-xs text-slate-500 mt-1">↑ 0.2% from previous period</p>
+              <p className="text-3xl font-bold text-yellow-400 mt-2">{chartData?.summary?.uptime || '0%'}</p>
+              <p className="text-xs text-slate-500 mt-1">Average availability</p>
             </div>
           </div>
         </div>

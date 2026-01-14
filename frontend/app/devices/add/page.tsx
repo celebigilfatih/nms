@@ -173,7 +173,7 @@ export default function AddDevicePage() {
           {/* Basic Info */}
           <div>
             <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <i className="fas fa-server text-purple-400" />
+              <i className="fas fa-server text-orange-400" />
               Basic Information
             </h2>
 
@@ -190,7 +190,7 @@ export default function AddDevicePage() {
                   placeholder="e.g., Core Router 1"
                   className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                     errors.name ? 'border-red-500' : 'border-slate-700'
-                  } text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition`}
+                  } text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition`}
                 />
                 {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
               </div>
@@ -208,7 +208,7 @@ export default function AddDevicePage() {
                     placeholder="192.168.1.1"
                     className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                       errors.ip ? 'border-red-500' : 'border-slate-700'
-                    } text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition`}
+                    } text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition`}
                   />
                   {errors.ip && <p className="text-red-400 text-xs mt-1">{errors.ip}</p>}
                 </div>
@@ -226,7 +226,7 @@ export default function AddDevicePage() {
                     max="65535"
                     className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                       errors.port ? 'border-red-500' : 'border-slate-700'
-                    } text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition`}
+                    } text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition`}
                   />
                   {errors.port && <p className="text-red-400 text-xs mt-1">{errors.port}</p>}
                 </div>
@@ -284,7 +284,7 @@ export default function AddDevicePage() {
                     placeholder="e.g., admin"
                     className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                       errors.ssh_username ? 'border-red-500' : 'border-slate-700'
-                    } text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition`}
+                    } text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition`}
                   />
                   {errors.ssh_username && <p className="text-red-400 text-xs mt-1">{errors.ssh_username}</p>}
                 </div>
@@ -301,7 +301,7 @@ export default function AddDevicePage() {
                       onChange={handleChange}
                       className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                         errors.ssh_password ? 'border-red-500' : 'border-slate-700'
-                      } text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition`}
+                      } text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition`}
                     />
                     <button
                       type="button"
@@ -338,7 +338,7 @@ export default function AddDevicePage() {
                     placeholder="https://api.example.com/v1/devices"
                     className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                       errors.api_url ? 'border-red-500' : 'border-slate-700'
-                    } text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition`}
+                    } text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition`}
                   />
                   {errors.api_url && <p className="text-red-400 text-xs mt-1">{errors.api_url}</p>}
                 </div>
@@ -351,7 +351,7 @@ export default function AddDevicePage() {
                     name="api_method"
                     value={formData.api_method}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                    className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                   >
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
@@ -372,7 +372,7 @@ export default function AddDevicePage() {
                     placeholder="Your API key"
                     className={`w-full px-4 py-2 rounded-lg bg-slate-900/50 border ${
                       errors.api_key ? 'border-red-500' : 'border-slate-700'
-                    } text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition`}
+                    } text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition`}
                   />
                   {errors.api_key && <p className="text-red-400 text-xs mt-1">{errors.api_key}</p>}
                 </div>
@@ -397,7 +397,7 @@ export default function AddDevicePage() {
                   name="snmp_version"
                   value={formData.snmp_version}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                 >
                   <option value="v2c">SNMPv2c</option>
                   <option value="v3">SNMPv3</option>
@@ -414,7 +414,7 @@ export default function AddDevicePage() {
                     name="community_string"
                     value={formData.community_string}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                    className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                   />
                 </div>
               )}
@@ -430,7 +430,7 @@ export default function AddDevicePage() {
                       name="snmp_username"
                       value={formData.snmp_username}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                     />
                   </div>
 
@@ -442,7 +442,7 @@ export default function AddDevicePage() {
                       name="snmp_auth_protocol"
                       value={formData.snmp_auth_protocol}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                     >
                       <option value="MD5">MD5</option>
                       <option value="SHA">SHA</option>
@@ -458,7 +458,7 @@ export default function AddDevicePage() {
                       name="snmp_auth_password"
                       value={formData.snmp_auth_password}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                     />
                   </div>
 
@@ -470,7 +470,7 @@ export default function AddDevicePage() {
                       name="snmp_privacy_protocol"
                       value={formData.snmp_privacy_protocol}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                     >
                       <option value="DES">DES</option>
                       <option value="3DES">3DES</option>
@@ -487,7 +487,7 @@ export default function AddDevicePage() {
                       name="snmp_privacy_password"
                       value={formData.snmp_privacy_password}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                      className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
                     />
                   </div>
                 </>
@@ -512,7 +512,7 @@ export default function AddDevicePage() {
                   name="vendor"
                   value={formData.vendor}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                 >
                   <option value="">Select Vendor</option>
                   {vendors.length > 0 ? (
@@ -548,7 +548,7 @@ export default function AddDevicePage() {
                   name="device_type"
                   value={formData.device_type}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+                  className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
                 >
                   <option value="">Select Type</option>
                   <option value="Router">Router</option>

@@ -10,14 +10,23 @@ class MetricsRepository {
   /**
    * Get metrics for device
    */
+  /**
+   * Get metrics for device (Alias for getByDevice)
+   */
+  static async getDeviceMetrics(deviceId, metricType = null, limit = 100) {
+    return this.getByDevice(deviceId, metricType, limit);
+  }
+
   static async getByDevice(deviceId, metricType = null, limit = 100) {
     try {
       let query = `
-        SELECT 
+        SELECT DISTINCT ON (metric_name)
           id, device_id, metric_type, metric_name, metric_value,
           metric_unit, status, collected_at
         FROM device_metrics
-        WHERE device_id = $1
+        WHERE device_id = $1 
+          AND metric_name IS NOT NULL 
+          AND metric_name != ''
       `;
 
       const params = [deviceId];
@@ -27,10 +36,13 @@ class MetricsRepository {
         params.push(metricType);
       }
 
-      query += ` ORDER BY collected_at DESC LIMIT $${params.length + 1}`;
+      query += ` ORDER BY metric_name, collected_at DESC LIMIT $${params.length + 1}`;
       params.push(limit);
 
-      return await database.queryAll(query, params);
+      const metrics = await database.queryAll(query, params);
+      
+      // Re-sort by collected_at descending for the UI
+      return metrics.sort((a, b) => new Date(b.collected_at) - new Date(a.collected_at));
     } catch (error) {
       logger.error('Failed to fetch metrics', { deviceId, error: error.message });
       throw error;
@@ -61,6 +73,10 @@ class MetricsRepository {
   /**
    * Create new metric
    */
+  static async createMetric(metricData) {
+    return this.create(metricData);
+  }
+
   static async create(metricData) {
     try {
       const {
@@ -72,7 +88,69 @@ class MetricsRepository {
         threshold_warning = null,
         threshold_critical = null,
         status = 'normal',
+        data = null, // Support for nested data from nms_service
       } = metricData;
+
+      // If nested data is provided, handle it as multiple metrics
+      if (data && typeof data === 'object') {
+        const results = [];
+        for (const [key, value] of Object.entries(data)) {
+          // Map internal keys to display names and types
+          let name = key;
+          let type = metric_type;
+          let unit = '';
+
+          if (key === 'cpu_usage') {
+            name = 'CPU Load';
+            type = 'cpu';
+            unit = '%';
+          } else if (key === 'memory_usage') {
+            name = 'Memory Usage';
+            type = 'memory';
+            unit = '%';
+          } else if (key === 'temperature') {
+            name = 'Chassis Temp';
+            type = 'temperature';
+            unit = 'C';
+          } else if (key === 'uptime_seconds') {
+            name = 'System Uptime';
+            type = 'uptime';
+            unit = 's';
+          } else if (key === 'disk_usage') {
+            name = 'Disk Usage';
+            type = 'disk';
+            unit = '%';
+          } else if (key === 'network_in') {
+            name = 'Network In';
+            type = 'network';
+            unit = 'Mbps';
+          } else if (key === 'network_out') {
+            name = 'Network Out';
+            type = 'network';
+            unit = 'Mbps';
+          } else if (key === 'interface_name' || key === 'interface_index' || key === 'admin_status' || key === 'oper_status' || key === 'speed') {
+            continue; // Skip metadata and interface-specific metrics in this generic table
+          }
+
+          if (value !== null && value !== undefined) {
+            results.push(await this.create({
+              device_id,
+              metric_type: type,
+              metric_name: name,
+              metric_value: value,
+              metric_unit: unit,
+              status
+            }));
+          }
+        }
+        return results.length > 0 ? results[0] : null;
+      }
+
+      // Basic validation for flat metrics
+      if (!metric_name || metric_value === undefined || metric_value === null) {
+        logger.warn('Skipping invalid metric', { device_id, metric_type, metric_name });
+        return null;
+      }
 
       const query = `
         INSERT INTO device_metrics 

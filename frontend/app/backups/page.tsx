@@ -190,7 +190,7 @@ export default function BackupsPage() {
           </div>
           <Link
             href="/backups/create"
-            className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition font-medium"
+            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition font-medium"
           >
             <i className="fas fa-plus" />
             Create Backup
@@ -225,9 +225,9 @@ export default function BackupsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-400 text-sm">Devices</p>
-                <p className="text-3xl font-bold text-purple-400 mt-1">{deviceNames.length}</p>
+                <p className="text-3xl font-bold text-orange-400 mt-1">{deviceNames.length}</p>
               </div>
-              <i className="fas fa-server text-3xl text-purple-400" />
+              <i className="fas fa-server text-3xl text-orange-400" />
             </div>
           </div>
 
@@ -249,13 +249,13 @@ export default function BackupsPage() {
             placeholder="Search by device or filename..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition"
           />
 
           <select
             value={deviceFilter}
             onChange={(e) => setDeviceFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
           >
             <option value="all">All Devices</option>
             {deviceNames.map(name => (
@@ -268,7 +268,7 @@ export default function BackupsPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-purple-500 transition"
+            className="px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-orange-500 transition"
           >
             <option value="all">All Types</option>
             <option value="running-config">Running Config</option>
